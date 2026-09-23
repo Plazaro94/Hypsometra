@@ -11,8 +11,9 @@
   "scripts": {
     "dev:web": "npm run dev -w @hypsometra/web",
     "build": "npm run build -w @hypsometra/engine && npm run build -ws --if-present",
-    "test": "npm run test -w @hypsometra/engine",
+    "test": "npm run test -w @hypsometra/engine && npm run test -w @hypsometra/opt",
     "test:engine": "npm run test -w @hypsometra/engine",
+    "test:opt": "npm run test -w @hypsometra/opt",
     "lint": "npm run lint -ws --if-present"
   },
   "engines": {

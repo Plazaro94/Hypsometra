@@ -39,8 +39,11 @@ Hypsometra/
 
 ## Estado
 
-**Engine v0 listo** (`packages/engine`): CSV → un pase → trades + métricas, con tests.
-Siguiente: optimización y walk-forward en `packages/opt`. Orometra sigue aparcado.
+**Engine v0** + **Opt/WFO v0** listos y testados.
+- `packages/engine` — CSV → un pase → métricas  
+- `packages/opt` — grid, genético, walk-forward `rolling` / `anchored`  
+
+Siguiente: CLI para lanzar jobs con tu CSV real, luego dashboard. Orometra sigue aparcado.
 
 ## Desarrollo local
 

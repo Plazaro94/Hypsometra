@@ -16,7 +16,8 @@ de precio que el usuario controla (CSV / ticks exportados).
 
 1. **Cimiento monorepo** ← hecho
 2. **Engine mínimo** — OHLC CSV → un pase → métricas ← hecho (v0)
-3. **Opt + WFO** — genético/búsqueda + ventanas walk-forward ← siguiente
-4. **Dashboard** — Next.js en Vercel + workers de cómputo
-5. **Monte Carlo** — cuando el engine emita lista de operaciones (ya emite `trades`)
-6. **Orometra** (`packages/orometra`) — **aplazado a propósito**. El paquete queda reservado; se integrará cuando el pipeline de backtest/opt ya produzca resultados auditables. No bloquea el desarrollo del motor.
+3. **Opt + WFO** — grid / genético + walk-forward rolling/anchored ← hecho (v0)
+4. **CLI** — lanzar backtest / WFO con CSV exportado de MT5 ← siguiente
+5. **Dashboard** — Next.js en Vercel + workers de cómputo
+6. **Monte Carlo** — sobre la lista de `trades` del engine
+7. **Orometra** (`packages/orometra`) — **aplazado a propósito**
