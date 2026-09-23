@@ -20,6 +20,7 @@ de precio que el usuario controla (CSV / ticks exportados).
 4. **Data + CLI** — `MarketDataSource` + ingestión CSV + `hypsometra dataset` ← hecho
 5. **CLI WFO / optimize** — jobs sobre dataset id (SMA v1) ← hecho
 6. **Monte Carlo** — shuffle / bootstrap sobre trades ← hecho
-7. **Dashboard** — Next.js en Vercel + workers ← siguiente
-8. **Orometra** — aplazado
-9. **Catalog / MT5 bridge** — mismos contratos, más adelante
+7. **Dashboard** — Next.js lab (upload + WFO + MC) ← hecho
+8. **Workers / Vercel storage** — cómputo y datasets persistentes en cloud ← siguiente
+9. **Orometra** — aplazado
+10. **Catalog / MT5 bridge** — mismos contratos, más adelante

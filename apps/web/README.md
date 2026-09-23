@@ -1,12 +1,15 @@
 # @hypsometra/web
 
-Dashboard de Hypsometra (despliegue previsto en Vercel).
+Dashboard de Hypsometra (Next.js · App Router).
 
-Aún no hay app Next.js: este directorio reserva el lugar en el monorepo.
-Cuando arranque la UI, vivirán aquí:
+```bash
+# desde la raíz del monorepo
+npm run build -w @hypsometra/engine
+npm run build -w @hypsometra/opt
+npm run build -w @hypsometra/data
+npm run dev:web
+```
 
-- **Backtest / optimización** — lanzar jobs, ver progreso
-- **Walk-forward & Monte Carlo** — resultados de robustez
-- **Orometra** — auditoría de mesetas (módulo integrado)
+Abre http://localhost:3000 — landing + `/lab` (CSV, WFO, Monte Carlo).
 
-El cómputo pesado no corre en Vercel: va a `workers/`.
+Los datasets se guardan en `data/datasets/` del monorepo.
