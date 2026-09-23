@@ -9,6 +9,22 @@ import { timeframeFromCode } from "./timeframes.js";
 
 export type TesterModel = "every_tick" | "ohlc_m1" | "open_prices" | "math" | "real_ticks";
 
+/** MT5 OptimizationCriterion values, in order. */
+export type TesterCriterion =
+  | "balance_max"
+  | "profit_factor_max"
+  | "expected_payoff_max"
+  | "drawdown_min"
+  | "recovery_factor_max"
+  | "sharpe_max"
+  | "custom_max"
+  | "complex_max";
+
+const CRITERIA: TesterCriterion[] = [
+  "balance_max", "profit_factor_max", "expected_payoff_max", "drawdown_min",
+  "recovery_factor_max", "sharpe_max", "custom_max", "complex_max",
+];
+
 export interface TesterConfig {
   expert?: string;
   symbol?: string;
@@ -22,7 +38,9 @@ export interface TesterConfig {
   leverage?: number;
   delay?: { mode: "none" | "random" | "fixed"; ms?: number };
   optimization?: "disabled" | "complete" | "genetic" | "all_symbols";
-  criterion?: number;
+  criterion?: TesterCriterion;
+  /** MT5 "profit in pips" mode: no margin control, swaps or commissions. */
+  profitInPips?: boolean;
   inputs: SetFile | null;
   /** Keys present in the text that were not recognized (shown to the user). */
   unknownKeys: string[];
@@ -129,7 +147,9 @@ export function parseTesterConfig(text: string): TesterConfig {
   const opt = get("optimization");
   if (opt !== undefined && OPTIMIZATION[Number(opt)]) cfg.optimization = OPTIMIZATION[Number(opt)]!;
   const crit = get("optimizationcriterion");
-  if (crit !== undefined && Number.isFinite(Number(crit))) cfg.criterion = Number(crit);
+  if (crit !== undefined && CRITERIA[Number(crit)]) cfg.criterion = CRITERIA[Number(crit)]!;
+  const pips = get("profitinpips");
+  if (pips !== undefined) cfg.profitInPips = pips === "1" || pips.toLowerCase() === "true";
 
   const inputsText = inputLines.filter((l) => !l.startsWith(";") || l.startsWith("; ==")).join("\n");
   if (inputLines.some((l) => !l.startsWith(";"))) {

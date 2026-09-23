@@ -12,4 +12,4 @@ export {
   type Session,
   type SymbolSpecification,
 } from "./symbol-spec.js";
-export { parseTesterConfig, type TesterConfig, type TesterModel } from "./tester-config.js";
+export { parseTesterConfig, type TesterConfig, type TesterCriterion, type TesterModel } from "./tester-config.js";

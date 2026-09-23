@@ -240,7 +240,7 @@ export function combinationCount(axes: ParamAxis[]): number {
 export type PeriodPreset = "all" | "last1y" | "last3y" | "last5y" | "custom";
 export type ValidationMode = "none" | "forward" | "walkforward";
 export type WfDefinition = "duration" | "runs" | "manual";
-export type Criterion = "netProfit" | "profitFactor" | "recoveryFactor" | "sharpe" | "maxDrawdownPct";
+export type Criterion = "netProfit" | "profitFactor" | "expectancy" | "recoveryFactor" | "sharpe" | "maxDrawdownPct";
 
 export interface ManualWindow {
   isFrom: string;
@@ -294,6 +294,7 @@ export interface StudyConfig {
 export const CRITERIA: Array<{ id: Criterion; label: string }> = [
   { id: "netProfit", label: "Beneficio neto máximo" },
   { id: "profitFactor", label: "Factor de beneficio máximo" },
+  { id: "expectancy", label: "Esperanza matemática máxima" },
   { id: "recoveryFactor", label: "Factor de recuperación máximo" },
   { id: "sharpe", label: "Ratio de Sharpe máximo" },
   { id: "maxDrawdownPct", label: "Drawdown relativo mínimo" },
@@ -406,7 +407,7 @@ export function applyTesterConfig(s: StudyConfig, cfg: TesterConfig): string[] {
   }
   if (cfg.fromDate && cfg.toDate) {
     s.period = { preset: "custom", from: cfg.fromDate, to: cfg.toDate };
-    notes.push(`Intervalo ${cfg.fromDate} → ${cfg.toDate}.`);
+    notes.push(`Intervalo ${cfg.fromDate.replace(/-/g, ".")} → ${cfg.toDate.replace(/-/g, ".")}.`);
   }
   if (cfg.model === "ohlc_m1" || cfg.model === "open_prices") {
     s.modeling = cfg.model;
@@ -431,7 +432,37 @@ export function applyTesterConfig(s: StudyConfig, cfg: TesterConfig): string[] {
     };
     notes.push("Forward de MT5 importado; puedes cambiarlo a walk-forward en Validación.");
   }
-  if (cfg.optimization === "complete" || cfg.optimization === "genetic") s.optimization.method = cfg.optimization;
+  if (cfg.optimization === "complete" || cfg.optimization === "genetic") {
+    s.optimization.method = cfg.optimization;
+  } else if (cfg.optimization === "disabled") {
+    notes.push("En MT5 la optimización estaba desactivada: marca en Parámetros qué inputs quieres optimizar.");
+  } else if (cfg.optimization === "all_symbols") {
+    notes.push("MT5 optimizaba sobre todos los símbolos de Observación del mercado; aquí el estudio es de un símbolo.");
+  }
+  if (cfg.criterion) {
+    const direct: Partial<Record<NonNullable<TesterConfig["criterion"]>, Criterion>> = {
+      balance_max: "netProfit",
+      profit_factor_max: "profitFactor",
+      expected_payoff_max: "expectancy",
+      drawdown_min: "maxDrawdownPct",
+      recovery_factor_max: "recoveryFactor",
+      sharpe_max: "sharpe",
+    };
+    const mapped = direct[cfg.criterion];
+    if (mapped) {
+      s.optimization.criterion = mapped;
+      notes.push(`Criterio: ${CRITERIA.find((c) => c.id === mapped)!.label}.`);
+    } else if (cfg.criterion === "complex_max") {
+      notes.push(
+        `MT5 usaba el «criterio complejo», cuya fórmula MetaQuotes no publica: no se puede reproducir con exactitud. Se mantiene «${CRITERIA.find((c) => c.id === s.optimization.criterion)!.label}»; cámbialo en Optimización si prefieres otro.`,
+      );
+    } else if (cfg.criterion === "custom_max") {
+      notes.push("MT5 usaba el criterio personalizado (OnTester del EA): estará disponible si el EA portado lo implementa.");
+    }
+  }
+  if (cfg.profitInPips) {
+    notes.push("MT5 calculaba el beneficio en pips (sin margen, swaps ni comisiones). Hypsometra simula siempre en dinero.");
+  }
   s.sources.tester = { kind: "tester", label: "Configuración del probador de MT5" };
   if (cfg.inputs) {
     notes.push(...applySetFile(s, cfg.inputs, "inputs del probador"));
