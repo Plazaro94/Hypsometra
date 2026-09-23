@@ -9,11 +9,13 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "hypsometra": "npm run build && node ./dist/index.js",
-    "test": "npm run build && node --test ./dist/cli.test.js",
+    "test": "npm run build && node --test ./dist/cli.test.js ./dist/space.test.js",
     "lint": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@hypsometra/data": "*"
+    "@hypsometra/data": "*",
+    "@hypsometra/engine": "*",
+    "@hypsometra/opt": "*"
   },
   "devDependencies": {
     "@types/node": "^22.13.10",

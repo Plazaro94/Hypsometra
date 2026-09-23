@@ -37,4 +37,15 @@ describe("parseOhlcCsv", () => {
     const bars = parseOhlcCsv(csv);
     assert.equal(bars[0]!.open, 1100.5);
   });
+
+  it("parses ISO datetimes with fractional seconds", () => {
+    const csv = [
+      "time,open,high,low,close",
+      "2020-01-01T00:00:00.000Z,1,2,0.5,1.5",
+      "2020-01-02T00:00:00.000Z,1.5,2.5,1,2",
+    ].join("\n");
+    const bars = parseOhlcCsv(csv);
+    assert.equal(bars.length, 2);
+    assert.equal(bars[0]!.time, Date.parse("2020-01-01T00:00:00.000Z"));
+  });
 });

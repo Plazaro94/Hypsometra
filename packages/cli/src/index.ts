@@ -8,18 +8,23 @@ import {
   defaultStoreDir,
   ingestCsvFile,
 } from "@hypsometra/data";
+import { cmdOptimize, cmdWfo, type JobFlags } from "./jobs.js";
 
 function printHelp(): void {
   console.log(`Hypsometra CLI
 
-Usage:
+Datasets:
   hypsometra dataset add <file.csv> --symbol XAUUSD --timeframe H1 [--store <dir>]
   hypsometra dataset list [--store <dir>]
   hypsometra dataset show <id> [--store <dir>]
 
+Jobs (SMA cross v1 strategy):
+  hypsometra optimize --dataset <id> --fast 3:5:1 --slow 8:12:2 [--search grid|genetic] [--criterion netProfit] [--out report.json]
+  hypsometra wfo --dataset <id> --is 40 --oos 20 --fast 3:5:1 --slow 10:14:2 [--wf rolling|anchored] [--step 20] [--out wfo.json]
+
 Examples:
-  hypsometra dataset add ./exports/XAUUSD_H1.csv --symbol XAUUSD --timeframe H1
-  hypsometra dataset list
+  hypsometra dataset add ./XAUUSD_H1.csv --symbol XAUUSD --timeframe H1
+  hypsometra wfo --dataset xauusd_h1_abc12345 --is 500 --oos 100 --fast 5:15:5 --slow 20:60:10 --search genetic --out wfo.json
 `);
 }
 
@@ -58,7 +63,9 @@ function cmdDatasetList(values: { store?: string }): void {
   const store = new LocalDatasetStore(storeFromArgs(values));
   const list = store.list();
   if (list.length === 0) {
-    console.log("No datasets. Add one with: hypsometra dataset add <file.csv> --symbol ... --timeframe ...");
+    console.log(
+      "No datasets. Add one with: hypsometra dataset add <file.csv> --symbol ... --timeframe ...",
+    );
     return;
   }
   for (const m of list) {
@@ -79,29 +86,49 @@ async function cmdDatasetShow(
     throw new Error(`Unknown dataset: ${id}`);
   }
   const bars = await new CsvLocalSource(storeDir).load({ datasetId: id });
-  console.log(JSON.stringify({ meta, preview: bars.slice(0, 3), barCount: bars.length }, null, 2));
+  console.log(
+    JSON.stringify(
+      { meta, preview: bars.slice(0, 3), barCount: bars.length },
+      null,
+      2,
+    ),
+  );
 }
 
-export async function run(argv: string[]): Promise<number> {
-  if (argv.length === 0 || argv[0] === "help" || argv[0] === "--help" || argv[0] === "-h") {
-    printHelp();
-    return 0;
-  }
+const sharedOptions = {
+  store: { type: "string" },
+  help: { type: "boolean", short: "h" },
+} as const;
 
-  const [command, sub, ...rest] = argv;
-  if (command !== "dataset") {
-    console.error(`Unknown command: ${command}`);
-    printHelp();
-    return 1;
-  }
+const jobOptions = {
+  ...sharedOptions,
+  dataset: { type: "string" },
+  search: { type: "string" },
+  criterion: { type: "string" },
+  fast: { type: "string" },
+  slow: { type: "string" },
+  balance: { type: "string" },
+  point: { type: "string" },
+  tickValue: { type: "string" },
+  spread: { type: "string" },
+  commission: { type: "string" },
+  out: { type: "string" },
+  population: { type: "string" },
+  generations: { type: "string" },
+  seed: { type: "string" },
+  wf: { type: "string" },
+  is: { type: "string" },
+  oos: { type: "string" },
+  step: { type: "string" },
+} as const;
 
+async function runDataset(sub: string | undefined, rest: string[]): Promise<number> {
   const { values, positionals } = parseArgs({
     args: rest,
     options: {
+      ...sharedOptions,
       symbol: { type: "string" },
       timeframe: { type: "string" },
-      store: { type: "string" },
-      help: { type: "boolean", short: "h" },
     },
     allowPositionals: true,
   });
@@ -129,6 +156,45 @@ export async function run(argv: string[]): Promise<number> {
   }
 
   console.error(`Unknown dataset subcommand: ${sub ?? "(none)"}`);
+  printHelp();
+  return 1;
+}
+
+export async function run(argv: string[]): Promise<number> {
+  if (
+    argv.length === 0 ||
+    argv[0] === "help" ||
+    argv[0] === "--help" ||
+    argv[0] === "-h"
+  ) {
+    printHelp();
+    return 0;
+  }
+
+  const [command, ...rest] = argv;
+
+  if (command === "dataset") {
+    const [sub, ...tail] = rest;
+    return runDataset(sub, tail);
+  }
+
+  if (command === "optimize" || command === "wfo") {
+    const { values } = parseArgs({
+      args: rest,
+      options: jobOptions,
+      allowPositionals: false,
+    });
+    if (values.help) {
+      printHelp();
+      return 0;
+    }
+    const flags = values as JobFlags;
+    if (command === "optimize") await cmdOptimize(flags);
+    else await cmdWfo(flags);
+    return 0;
+  }
+
+  console.error(`Unknown command: ${command}`);
   printHelp();
   return 1;
 }

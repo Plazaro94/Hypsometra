@@ -63,16 +63,21 @@ function parseTime(raw: string, utc: boolean): number {
     // seconds vs ms heuristic
     return n < 1e12 ? n * 1000 : n;
   }
+
+  // Prefer native parse for ISO-8601 (including fractional seconds).
+  // Do NOT globally replace "." — that breaks "2024-01-01T00:00:00.000Z".
+  let ms = Date.parse(t);
+  if (!Number.isNaN(ms)) return ms;
+
   // MT5 often exports "2024.01.15 12:00" or "2024.01.15"
-  const normalized = t
-    .replace(/\./g, "-")
-    .replace(/\//g, "-")
-    .replace(" ", "T");
+  const mt5Date = t.replace(/^(\d{4})\.(\d{2})\.(\d{2})/, "$1-$2-$3");
+  const normalized = mt5Date.replace(/\//g, "-").replace(" ", "T");
   const iso = /T\d/.test(normalized)
     ? normalized
     : `${normalized}T00:00:00`;
-  const withZone = utc && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(iso) ? `${iso}Z` : iso;
-  const ms = Date.parse(withZone);
+  const withZone =
+    utc && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(iso) ? `${iso}Z` : iso;
+  ms = Date.parse(withZone);
   if (Number.isNaN(ms)) {
     throw new Error(`Unrecognized datetime: "${raw}"`);
   }

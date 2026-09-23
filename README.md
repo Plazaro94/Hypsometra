@@ -41,19 +41,24 @@ Hypsometra/
 
 ## Estado
 
-**Engine** + **Opt/WFO** + **Data (CSV)** + **CLI** listos.
-- Ingestión: `npm run hypsometra -- dataset add ./archivo.csv --symbol XAUUSD --timeframe H1`
-- Datasets locales en `data/datasets/` (gitignored)
+**Engine** + **Opt/WFO** + **Data (CSV)** + **CLI (dataset / optimize / wfo)** listos.
 
-Siguiente: cablear WFO desde CLI sobre un dataset. Orometra sigue aparcado.
+```bash
+npm run hypsometra -- dataset add ./XAUUSD_H1.csv --symbol XAUUSD --timeframe H1
+npm run hypsometra -- dataset list
+npm run hypsometra -- wfo --dataset <id> --is 500 --oos 100 --fast 5:15:5 --slow 20:60:10 --out wfo.json
+```
+
+Estrategia CLI v1: cruce SMA (placeholder). Orometra aparcado. Siguiente: dashboard o Monte Carlo.
 
 ## Desarrollo local
 
-Requisitos: Node 20+, [pnpm](https://pnpm.io) 9+.
+Requisitos: Node 20+.
 
 ```bash
-pnpm install
-pnpm dev:web
+npm install
+npm test
+npm run hypsometra -- help
 ```
 
 ## Licencia
