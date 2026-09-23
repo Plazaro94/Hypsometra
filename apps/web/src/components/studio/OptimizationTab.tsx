@@ -7,6 +7,8 @@ export interface ReadinessItem {
   label: string;
   ok: boolean;
   detail: string;
+  /** Recommended but not required to run. */
+  optional?: boolean;
 }
 
 interface Props {
@@ -128,10 +130,13 @@ export function OptimizationTab({ study, update, run, readiness, maxCores }: Pro
       <Panel kicker="Antes de ejecutar" title="Comprobación previa">
         <ul className="checklist">
           {readiness.map((r) => (
-            <li key={r.label} className={r.ok ? "ok" : "todo"}>
-              <span className="check-mark" aria-hidden="true">{r.ok ? "✓" : "·"}</span>
+            <li key={r.label} className={r.ok ? "ok" : r.optional ? "advice" : "todo"}>
+              <span className="check-mark" aria-hidden="true">{r.ok ? "✓" : r.optional ? "!" : "·"}</span>
               <div>
-                <div className="check-label">{r.label}</div>
+                <div className="check-label">
+                  {r.label}
+                  {r.optional && !r.ok && <span className="check-optional">recomendado</span>}
+                </div>
                 <div className="check-detail">{r.detail}</div>
               </div>
             </li>

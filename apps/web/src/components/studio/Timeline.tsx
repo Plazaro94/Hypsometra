@@ -11,35 +11,45 @@ const AXIS_H = 22;
 
 export function Timeline(props: {
   windows: ValidationWindow[];
-  period: { from: number; to: number };
+  total: { from: number; to: number };
+  unseen: { from: number; to: number } | null;
   issueIndexes: Set<number>;
 }) {
-  const { windows, period } = props;
-  const span = period.to - period.from;
-  const x = (t: number) => PAD_L + ((t - period.from) / span) * (W - PAD_L - PAD_R);
+  const { windows, total, unseen } = props;
+  const span = total.to - total.from;
+  const x = (t: number) => PAD_L + ((t - total.from) / span) * (W - PAD_L - PAD_R);
   const rows = Math.max(windows.length, 1);
   const H = rows * (ROW + GAP) + AXIS_H;
+  const bodyH = H - AXIS_H;
 
   const years: number[] = [];
-  const startYear = new Date(period.from).getUTCFullYear();
-  const endYear = new Date(period.to).getUTCFullYear();
+  const startYear = new Date(total.from).getUTCFullYear();
+  const endYear = new Date(total.to).getUTCFullYear();
   const every = endYear - startYear > 14 ? 2 : 1;
   for (let y = startYear; y <= endYear + 1; y += every) {
     const t = Date.UTC(y, 0, 1);
-    if (t >= period.from && t <= period.to) years.push(t);
+    if (t >= total.from && t <= total.to) years.push(t);
   }
 
   return (
     <svg className="timeline" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Ventanas de validación en el tiempo">
       {years.map((t) => (
         <g key={t}>
-          <line className="tl-grid" x1={x(t)} x2={x(t)} y1={0} y2={H - AXIS_H + 4} />
+          <line className="tl-grid" x1={x(t)} x2={x(t)} y1={0} y2={bodyH + 4} />
           <text className="tl-tick" x={x(t)} y={H - 6} textAnchor="middle">
             {new Date(t).getUTCFullYear()}
           </text>
         </g>
       ))}
-      <rect className="tl-period" x={x(period.from)} y={0} width={x(period.to) - x(period.from)} height={H - AXIS_H} />
+      <rect className="tl-period" x={x(total.from)} y={0} width={x(total.to) - x(total.from)} height={bodyH} />
+      {unseen && (
+        <g>
+          <rect className="tl-unseen" x={x(unseen.from)} y={0} width={x(unseen.to) - x(unseen.from)} height={bodyH} rx={3} />
+          <text className="tl-unseen-label" x={(x(unseen.from) + x(unseen.to)) / 2} y={Math.min(bodyH / 2 + 4, 16)} textAnchor="middle">
+            no visto
+          </text>
+        </g>
+      )}
       {windows.map((w, i) => {
         const y = i * (ROW + GAP) + 2;
         const bad = props.issueIndexes.has(w.index);

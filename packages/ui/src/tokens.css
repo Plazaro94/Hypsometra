@@ -19,6 +19,8 @@
   /* Validation segments: in-sample reads as information, out-of-sample as the verdict. */
   --seg-is:var(--info);   --seg-is-bg:var(--info-bg);   --seg-is-line:var(--info-line);
   --seg-oos:var(--ok);    --seg-oos-bg:var(--ok-bg);    --seg-oos-line:var(--ok-line);
+  /* Unseen hold-out: amber, "sealed until the final decision". */
+  --seg-unseen:var(--warn); --seg-unseen-bg:var(--warn-bg); --seg-unseen-line:var(--warn-line);
 
   --accent:var(--ok);    --accent2:var(--info);
   --radius:10px;

@@ -10,6 +10,7 @@ import {
   planWindows,
   spanLabel,
   toManual,
+  type Periods,
   type StudyConfig,
   type ValidationMode,
   type WfDefinition,
@@ -19,7 +20,9 @@ import {
 interface Props {
   study: StudyConfig;
   update: (fn: (s: StudyConfig) => void) => void;
+  /** Research period: the windows live here, never in the unseen segment. */
   period: { from: number; to: number } | null;
+  periods: Periods | null;
   plan: WindowPlan;
 }
 
@@ -68,7 +71,7 @@ function DurationInput(props: { label: string; value: Duration; onChange: (d: Du
   );
 }
 
-export function ValidationTab({ study, update, period, plan }: Props) {
+export function ValidationTab({ study, update, period, periods, plan }: Props) {
   const v = study.validation;
   const wf = v.wf;
   const issueIndexes = new Set(plan.issues.map((i) => i.index).filter((i): i is number => i !== null));
@@ -269,7 +272,9 @@ export function ValidationTab({ study, update, period, plan }: Props) {
             <div className="kpi">
               <div className="kpi-label">Cobertura OOS</div>
               <div className="kpi-value">{Math.round(plan.coverage * 100)} %</div>
-              <div className="kpi-note">del periodo se valida fuera de muestra</div>
+              <div className="kpi-note">
+                {periods?.unseen ? "del periodo de investigación" : "del periodo se valida fuera de muestra"}
+              </div>
             </div>
           </div>
 
@@ -277,8 +282,11 @@ export function ValidationTab({ study, update, period, plan }: Props) {
             <div className="chart-legend">
               <span className="chart-legend-item"><span className="legend-bar is" />In-sample · optimización</span>
               <span className="chart-legend-item"><span className="legend-bar oos" />Out-of-sample · validación</span>
+              {periods?.unseen && (
+                <span className="chart-legend-item"><span className="legend-bar unseen" />No visto · prueba final, bloqueado</span>
+              )}
             </div>
-            <Timeline windows={plan.windows} period={period} issueIndexes={issueIndexes} />
+            <Timeline windows={plan.windows} total={periods?.total ?? period} unseen={periods?.unseen ?? null} issueIndexes={issueIndexes} />
 
             {plan.issues.length > 0 && (
               <div className="error-box">
@@ -318,9 +326,9 @@ export function ValidationTab({ study, update, period, plan }: Props) {
             </div>
             {period && plan.windows.length > 0 && v.mode === "walkforward" && (
               <p className="field-hint mt">
-                Datos sin usar al final del periodo:{" "}
+                {periods?.unseen ? "Días sin usar antes del periodo no visto: " : "Datos sin usar al final del periodo: "}
                 {plan.windows[plan.windows.length - 1]!.oosTo < period.to
-                  ? `${spanLabel(plan.windows[plan.windows.length - 1]!.oosTo, period.to)} (desde ${formatDay(plan.windows[plan.windows.length - 1]!.oosTo)}).`
+                  ? `${spanLabel(plan.windows[plan.windows.length - 1]!.oosTo, period.to)} (desde ${formatDayMt5(plan.windows[plan.windows.length - 1]!.oosTo)}). No entran en ninguna ventana.`
                   : "ninguno."}
               </p>
             )}

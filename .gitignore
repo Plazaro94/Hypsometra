@@ -6,6 +6,7 @@ node_modules/
 dist/
 build/
 .next/
+.next-verify/
 out/
 *.tsbuildinfo
 
@@ -26,6 +27,9 @@ private/
 *.mq5
 *.mqh
 *.ex5
+*.set
+# Hypsometra's own MT5 tools are open source
+!tools/mt5/*.mq5
 
 # Data & artifacts (local only)
 data/datasets/

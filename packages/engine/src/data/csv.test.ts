@@ -25,6 +25,7 @@ describe("parseOhlcCsv", () => {
     ].join("\n");
     const bars = parseOhlcCsv(csv);
     assert.equal(bars.length, 2);
+    assert.equal(bars[0]!.time, Date.parse("2024-03-01T12:00:00Z"));
     assert.equal(bars[0]!.open, 2000.1);
     assert.equal(bars[1]!.volume, 130);
   });
@@ -36,6 +37,20 @@ describe("parseOhlcCsv", () => {
     ].join("\n");
     const bars = parseOhlcCsv(csv);
     assert.equal(bars[0]!.open, 1100.5);
+  });
+
+  it("reads the MT5 bars export with tabs, tick volume and spread", () => {
+    const csv = [
+      "<DATE>\t<TIME>\t<OPEN>\t<HIGH>\t<LOW>\t<CLOSE>\t<TICKVOL>\t<VOL>\t<SPREAD>",
+      "2024.01.02\t01:01:00\t2062.66\t2063.10\t2062.40\t2062.90\t38\t0\t21",
+      "2024.01.02\t01:02:00\t2062.90\t2063.00\t2062.55\t2062.70\t25\t0\t18",
+    ].join("\r\n");
+    const bars = parseOhlcCsv(csv);
+    assert.equal(bars.length, 2);
+    assert.equal(bars[0]!.time, Date.parse("2024-01-02T01:01:00Z"));
+    assert.equal(bars[0]!.volume, 38);
+    assert.equal(bars[0]!.spread, 21);
+    assert.equal(bars[1]!.spread, 18);
   });
 
   it("parses ISO datetimes with fractional seconds", () => {

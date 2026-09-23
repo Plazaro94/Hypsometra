@@ -111,6 +111,52 @@ export function NumInput(props: {
   );
 }
 
+/** File picker with Spanish labels (the native control follows the browser language). */
+export function FilePick(props: { accept: string; onFile: (f: File) => void; label?: string }) {
+  const [name, setName] = useState<string | null>(null);
+  return (
+    <label className="file-pick">
+      <input
+        type="file"
+        className="file-input"
+        accept={props.accept}
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          e.target.value = "";
+          if (f) {
+            setName(f.name);
+            props.onFile(f);
+          }
+        }}
+      />
+      <span className="ghost-btn">{props.label ?? "Elegir archivo…"}</span>
+      <span className="file-name">{name ?? "Ningún archivo"}</span>
+    </label>
+  );
+}
+
+/** Short, collapsible "how do I get this?" guidance for anything that is not a simple choice. */
+export function Help(props: { title?: string; children: ReactNode }) {
+  return (
+    <details className="help">
+      <summary>{props.title ?? "¿Cómo lo obtengo?"}</summary>
+      <div className="help-body">{props.children}</div>
+    </details>
+  );
+}
+
+/** Where a block of values came from (imported file, tester, defaults…). */
+export function SourceBadge(props: { kind: "default" | "file" | "tester" | "manual"; label: string }) {
+  const cls = props.kind === "default" ? "badge warn" : props.kind === "manual" ? "badge" : "badge ok";
+  const prefix = props.kind === "default" ? "" : props.kind === "manual" ? "Editado · " : "Importado · ";
+  return (
+    <span className={cls} title={props.label}>
+      {prefix}
+      {props.label}
+    </span>
+  );
+}
+
 export function BrandMark() {
   return (
     <svg className="brand-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">

@@ -31,6 +31,7 @@ const VOLUME_ALIASES = new Set([
   "<tickvol>",
   "<vol>",
 ]);
+const SPREAD_ALIASES = new Set(["spread", "<spread>"]);
 
 function detectDelimiter(headerLine: string): "," | ";" | "\t" {
   const counts: Array<{ d: "," | ";" | "\t"; n: number }> = [
@@ -64,20 +65,15 @@ function parseTime(raw: string, utc: boolean): number {
     return n < 1e12 ? n * 1000 : n;
   }
 
-  // Prefer native parse for ISO-8601 (including fractional seconds).
-  // Do NOT globally replace "." — that breaks "2024-01-01T00:00:00.000Z".
-  let ms = Date.parse(t);
-  if (!Number.isNaN(ms)) return ms;
-
-  // MT5 often exports "2024.01.15 12:00" or "2024.01.15"
-  const mt5Date = t.replace(/^(\d{4})\.(\d{2})\.(\d{2})/, "$1-$2-$3");
-  const normalized = mt5Date.replace(/\//g, "-").replace(" ", "T");
-  const iso = /T\d/.test(normalized)
-    ? normalized
-    : `${normalized}T00:00:00`;
-  const withZone =
-    utc && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(iso) ? `${iso}Z` : iso;
-  ms = Date.parse(withZone);
+  // Never hand a zone-less string to Date.parse: V8 reads formats like
+  // "2024.01.02 01:01" as machine-local time, silently shifting MT5 server times.
+  const m =
+    /^(\d{4})[.\-/](\d{2})[.\-/](\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2})(\.\d+)?)?)?\s*(Z|[+-]\d{2}:?\d{2})?$/i.exec(t);
+  if (!m) throw new Error(`Unrecognized datetime: "${raw}"`);
+  const [, y, mo, d, h = "00", mi = "00", s = "00", frac = "", zone] = m;
+  const iso = `${y}-${mo}-${d}T${h}:${mi}:${s}${frac}`;
+  const withZone = zone ? `${iso}${zone.toUpperCase()}` : utc ? `${iso}Z` : iso;
+  const ms = Date.parse(withZone);
   if (Number.isNaN(ms)) {
     throw new Error(`Unrecognized datetime: "${raw}"`);
   }
@@ -118,6 +114,8 @@ export function parseOhlcCsv(text: string, options: CsvLoadOptions = {}): Bar[] 
   const closeIdx = findColumn(headers, CLOSE_ALIASES);
   const volumeIdx = findColumn(headers, VOLUME_ALIASES);
 
+  const spreadIdx = findColumn(headers, SPREAD_ALIASES);
+
   if (openIdx < 0 || highIdx < 0 || lowIdx < 0 || closeIdx < 0) {
     throw new Error(
       `Missing OHLC columns. Found headers: ${headers.join(", ")}`,
@@ -146,19 +144,22 @@ export function parseOhlcCsv(text: string, options: CsvLoadOptions = {}): Bar[] 
     const close = parseNumber(cols[closeIdx] ?? "");
     const volume =
       volumeIdx >= 0 ? parseNumber(cols[volumeIdx] ?? "0") : 0;
+    const spread = spreadIdx >= 0 ? parseNumber(cols[spreadIdx] ?? "") : Number.NaN;
 
     if ([open, high, low, close].some((x) => Number.isNaN(x))) {
       throw new Error(`Invalid numeric OHLC at row ${i + 1}`);
     }
 
-    bars.push({
+    const bar: Bar = {
       time: parseTime(timeRaw, utc),
       open,
       high,
       low,
       close,
       volume: Number.isNaN(volume) ? 0 : volume,
-    });
+    };
+    if (Number.isFinite(spread)) bar.spread = spread;
+    bars.push(bar);
   }
 
   for (let i = 1; i < bars.length; i++) {
@@ -176,5 +177,11 @@ export function loadOhlcCsvFile(
   path: string,
   options: CsvLoadOptions = {},
 ): Bar[] {
-  return parseOhlcCsv(readFileSync(path, "utf8"), options);
+  const bytes = readFileSync(path);
+  // MT5 may save exports as UTF-16LE with BOM.
+  const text =
+    bytes.length >= 2 && bytes[0] === 0xff && bytes[1] === 0xfe
+      ? bytes.subarray(2).toString("utf16le")
+      : bytes.toString("utf8").replace(/^\uFEFF/, "");
+  return parseOhlcCsv(text, options);
 }

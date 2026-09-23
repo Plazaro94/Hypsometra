@@ -8,6 +8,8 @@ export interface Bar {
   low: number;
   close: number;
   volume: number;
+  /** Spread in points at the bar (MT5 <SPREAD> column), when the export includes it. */
+  spread?: number;
 }
 
 export type Side = "long" | "short";

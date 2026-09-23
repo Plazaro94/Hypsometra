@@ -10,8 +10,10 @@
   ],
   "scripts": {
     "dev:web": "npm run dev -w @hypsometra/web",
-    "build": "npm run build -w @hypsometra/engine && npm run build -w @hypsometra/opt && npm run build -w @hypsometra/data && npm run build -w @hypsometra/cli && npm run build -w @hypsometra/web",
-    "test": "npm run test -w @hypsometra/engine && npm run test -w @hypsometra/opt && npm run test -w @hypsometra/data && npm run test -w @hypsometra/cli",
+    "build:packages": "npm run build -w @hypsometra/engine && npm run build -w @hypsometra/opt && npm run build -w @hypsometra/mt5 && npm run build -w @hypsometra/data && npm run build -w @hypsometra/cli",
+    "build": "npm run build:packages && npm run build -w @hypsometra/web",
+    "test": "npm run test -w @hypsometra/engine && npm run test -w @hypsometra/opt && npm run test -w @hypsometra/mt5 && npm run test -w @hypsometra/data && npm run test -w @hypsometra/cli",
+    "test:mt5": "npm run test -w @hypsometra/mt5",
     "test:engine": "npm run test -w @hypsometra/engine",
     "test:opt": "npm run test -w @hypsometra/opt",
     "test:data": "npm run test -w @hypsometra/data",

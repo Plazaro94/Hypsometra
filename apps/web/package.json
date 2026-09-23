@@ -12,6 +12,7 @@
   "dependencies": {
     "@hypsometra/data": "*",
     "@hypsometra/engine": "*",
+    "@hypsometra/mt5": "*",
     "@hypsometra/opt": "*",
     "@hypsometra/ui": "*",
     "next": "15.2.4",

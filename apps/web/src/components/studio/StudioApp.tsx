@@ -8,18 +8,20 @@ import { ParamsTab } from "@/components/studio/ParamsTab";
 import { ValidationTab } from "@/components/studio/ValidationTab";
 import { OptimizationTab, type ReadinessItem } from "@/components/studio/OptimizationTab";
 import {
-  SYMBOL_PRESETS,
   combinationCount,
   defaultStudy,
   formatDayMt5,
   loadStudy,
   paramAxis,
-  paramDefaults,
+  paramDefs,
   periodIssues as computePeriodIssues,
   planRun,
   planWindows,
-  resolvePeriod,
+  rangeLabel,
+  registryDefaults,
+  resolvePeriods,
   saveStudy,
+  spanLabel,
   type DatasetMeta,
   type StudyConfig,
 } from "@/lib/study";
@@ -92,28 +94,28 @@ export function StudioApp() {
   function selectDataset(d: DatasetMeta | undefined) {
     update((s) => {
       s.datasetId = d?.id ?? null;
-      if (d) {
-        s.symbol = d.symbol.toUpperCase();
-        const preset = SYMBOL_PRESETS[s.symbol];
-        if (preset) s.symbolSpec = { ...preset };
-      }
+      if (d) s.symbol = d.symbol.toUpperCase();
     });
   }
 
   const strategy = getStrategy(study.strategyId);
   const dataset = datasets.find((d) => d.id === study.datasetId);
-  const period = useMemo(() => resolvePeriod(study, dataset), [study, dataset]);
-  const pIssues = useMemo(() => computePeriodIssues(period, dataset), [period, dataset]);
+  const periods = useMemo(() => resolvePeriods(study, dataset), [study, dataset]);
+  const research = periods?.research ?? null;
+  const pIssues = useMemo(() => computePeriodIssues(study, periods, dataset), [study, periods, dataset]);
+  const defs = useMemo(() => paramDefs(study, strategy), [study, strategy]);
   const axes = useMemo(
-    () => (strategy?.params ?? []).flatMap((spec) => {
-      const s = study.params[spec.name];
-      return s ? [paramAxis(spec, s)] : [];
-    }),
-    [strategy, study.params],
+    () =>
+      defs.flatMap((def) => {
+        const s = study.params[def.name];
+        return s ? [paramAxis(def, s)] : [];
+      }),
+    [defs, study.params],
   );
   const combinations = combinationCount(axes);
-  const plan = useMemo(() => planWindows(study, period), [study, period]);
-  const run = planRun(study, combinations, plan, period);
+  const plan = useMemo(() => planWindows(study, research), [study, research]);
+  const run = planRun(study, combinations, plan, research);
+  const specFromBroker = study.spec.source.kind === "file" || study.spec.source.kind === "manual";
 
   const readiness: ReadinessItem[] = [
     {
@@ -130,9 +132,22 @@ export function StudioApp() {
       detail: dataset ? `${dataset.symbol} ${dataset.timeframe}, ${formatDayMt5(dataset.from)} → ${formatDayMt5(dataset.to)}.` : "Importa un CSV OHLC M1 en Configuración.",
     },
     {
-      label: "Periodo dentro de los datos",
-      ok: period !== null && pIssues.length === 0 && dataset !== undefined,
-      detail: pIssues[0] ?? (period ? `${formatDayMt5(period.from)} → ${formatDayMt5(period.to - 86_400_000)}.` : "Periodo no válido."),
+      label: "Especificación del símbolo del bróker",
+      ok: specFromBroker,
+      detail: specFromBroker ? `${study.spec.symbol}: ${study.spec.source.label}.` : "Se usan valores de ejemplo. Importa la especificación (tarjeta C).",
+    },
+    {
+      label: "Intervalo dentro de los datos",
+      ok: periods !== null && pIssues.length === 0 && dataset !== undefined,
+      detail: pIssues[0] ?? (periods ? `${rangeLabel(periods.total)}.` : "Intervalo no válido."),
+    },
+    {
+      label: "Periodo no visto reservado",
+      ok: periods?.unseen != null,
+      optional: true,
+      detail: periods?.unseen
+        ? `${rangeLabel(periods.unseen)} (${spanLabel(periods.unseen.from, periods.unseen.to)}), bloqueado para la prueba final.`
+        : "Recomendado: reserva un tramo final para la prueba go / no go.",
     },
     {
       label: "Rangos de parámetros",
@@ -159,10 +174,10 @@ export function StudioApp() {
       detail: "Fase 4: pases en paralelo en procesos locales, fuera del navegador.",
     },
   ];
-  const ready = readiness.every((r) => r.ok);
+  const ready = readiness.every((r) => r.ok || r.optional);
 
   const tabWarn: Record<Tab, boolean> = {
-    config: !dataset || pIssues.length > 0 || strategy?.status !== "ready",
+    config: !dataset || pIssues.length > 0 || strategy?.status !== "ready" || !specFromBroker,
     params: axes.some((a) => a.error),
     validation: Boolean(plan.error) || plan.issues.length > 0,
     optimization: false,
@@ -192,7 +207,7 @@ export function StudioApp() {
   async function importStudy(file: File) {
     try {
       const parsed = JSON.parse(await file.text()) as StudyConfig;
-      if (parsed.version !== 1 || typeof parsed.strategyId !== "string") throw new Error();
+      if (parsed.version !== 2 || typeof parsed.strategyId !== "string") throw new Error();
       setStudy(parsed);
     } catch {
       window.alert("El archivo no es un estudio de Hypsometra válido.");
@@ -203,7 +218,8 @@ export function StudioApp() {
     study.symbol,
     study.chartTimeframe,
     MODELING_LABEL[study.modeling],
-    period ? `${formatDayMt5(period.from)} → ${formatDayMt5(period.to - 86_400_000)}` : "periodo sin definir",
+    periods ? rangeLabel(periods.total) : "periodo sin definir",
+    ...(periods?.unseen ? [`no visto desde ${formatDayMt5(periods.unseen.from)}`] : []),
     `${study.account.deposit.toLocaleString("es-ES")} ${study.account.currency}`,
     `1:${study.account.leverage}`,
   ].join(" · ");
@@ -321,25 +337,28 @@ export function StudioApp() {
             <ConfigTab
               study={study}
               update={update}
+              replace={setStudy}
               strategy={strategy}
               onStrategyChange={(id) =>
                 update((s) => {
                   s.strategyId = id;
-                  s.params = paramDefaults(getStrategy(id));
+                  s.inputs = null;
+                  s.sources.set = null;
+                  s.params = registryDefaults(getStrategy(id));
                 })
               }
               datasets={datasets}
               dataset={dataset}
               onDatasetChange={(id) => selectDataset(datasets.find((d) => d.id === id))}
               onDatasetsChanged={refreshDatasets}
-              period={period}
+              periods={periods}
               periodIssues={pIssues}
             />
           )}
           {tab === "params" && (
-            <ParamsTab study={study} update={update} strategy={strategy} axes={axes} combinations={combinations} />
+            <ParamsTab study={study} update={update} strategy={strategy} defs={defs} axes={axes} combinations={combinations} />
           )}
-          {tab === "validation" && <ValidationTab study={study} update={update} period={period} plan={plan} />}
+          {tab === "validation" && <ValidationTab study={study} update={update} period={research} periods={periods} plan={plan} />}
           {tab === "optimization" && (
             <OptimizationTab study={study} update={update} run={run} readiness={readiness} maxCores={maxCores} />
           )}
