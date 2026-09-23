@@ -1,0 +1,15 @@
+{
+  "name": "@hypsometra/opt",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "lint": "echo \"lint pending\""
+  },
+  "description": "Optimization, walk-forward, and Monte Carlo orchestration."
+}

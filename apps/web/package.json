@@ -1,0 +1,12 @@
+{
+  "name": "@hypsometra/web",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo \"Next.js app pendiente — ver apps/web/README.md\"",
+    "build": "echo \"build pending\"",
+    "test": "echo \"no tests yet\"",
+    "lint": "echo \"lint pending\""
+  },
+  "description": "Hypsometra dashboard (Vercel)."
+}

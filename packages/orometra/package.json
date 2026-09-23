@@ -1,0 +1,15 @@
+{
+  "name": "@hypsometra/orometra",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "lint": "echo \"lint pending\""
+  },
+  "description": "Plateau audit and evidence scoring (from the Orometra product)."
+}

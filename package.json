@@ -1,0 +1,16 @@
+{
+  "name": "hypsometra",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mide el relieve de tu estrategia, no la altura de un pico.",
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev:web": "pnpm --filter @hypsometra/web dev",
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
