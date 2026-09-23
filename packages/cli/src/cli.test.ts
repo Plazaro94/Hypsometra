@@ -135,5 +135,34 @@ describe("cli optimize + wfo", () => {
     assert.equal(wfoReport.kind, "walk-forward");
     assert.ok(wfoReport.result.folds.length >= 2);
     assert.ok(Number.isFinite(wfoReport.result.combinedOosNetProfit));
+
+    const mcOut = join(dir, "mc.json");
+    assert.equal(
+      await run([
+        "montecarlo",
+        "--dataset",
+        id,
+        "--store",
+        store,
+        "--fast",
+        "3",
+        "--slow",
+        "10",
+        "--method",
+        "bootstrap",
+        "--sims",
+        "200",
+        "--out",
+        mcOut,
+      ]),
+      0,
+    );
+    const mcReport = JSON.parse(readFileSync(mcOut, "utf8")) as {
+      kind: string;
+      result: { simulations: number; probProfit: number };
+    };
+    assert.equal(mcReport.kind, "montecarlo");
+    assert.equal(mcReport.result.simulations, 200);
+    assert.ok(mcReport.result.probProfit >= 0);
   });
 });

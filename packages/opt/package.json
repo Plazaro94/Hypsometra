@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "npm run build && node --test ./dist/space.test.js ./dist/optimize.test.js ./dist/walk-forward.test.js",
+    "test": "npm run build && node --test ./dist/space.test.js ./dist/optimize.test.js ./dist/walk-forward.test.js ./dist/monte-carlo.test.js",
     "lint": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

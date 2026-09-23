@@ -2,6 +2,7 @@ import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
   createSmaCrossStrategy,
+  runBacktest,
   type BacktestConfig,
   type PerformanceMetrics,
 } from "@hypsometra/engine";
@@ -9,7 +10,9 @@ import { CsvLocalSource, LocalDatasetStore } from "@hypsometra/data";
 import {
   optimize,
   walkForward,
+  monteCarlo,
   type Criterion,
+  type MonteCarloMethod,
   type ParamMap,
 } from "@hypsometra/opt";
 import { buildSmaSpace } from "./space.js";
@@ -36,6 +39,10 @@ export interface JobFlags {
   is?: string;
   oos?: string;
   step?: string;
+  /** montecarlo only */
+  sims?: string;
+  method?: string;
+  dropRate?: string;
 }
 
 const METRIC_KEYS = new Set<string>([
@@ -234,6 +241,89 @@ export async function cmdWfo(flags: JobFlags): Promise<void> {
   writeOut(flags.out, {
     kind: "walk-forward",
     dataset: ctx.meta,
+    result,
+  });
+}
+
+export async function cmdMonteCarlo(flags: JobFlags): Promise<void> {
+  if (!flags.dataset) throw new Error("--dataset is required");
+  if (!flags.fast || !flags.slow) {
+    throw new Error(
+      "Fixed SMA periods required: --fast <n> --slow <n> (single values, not ranges)",
+    );
+  }
+  const fast = Number(flags.fast);
+  const slow = Number(flags.slow);
+  if (!Number.isFinite(fast) || !Number.isFinite(slow) || fast < 1 || slow < 1) {
+    throw new Error("--fast and --slow must be positive numbers");
+  }
+  if (String(flags.fast).includes(":") || String(flags.slow).includes(":")) {
+    throw new Error(
+      "montecarlo uses fixed periods (--fast 10 --slow 30), not ranges. Run optimize/wfo first to choose them.",
+    );
+  }
+
+  const storeDir = flags.store;
+  const store = new LocalDatasetStore(storeDir);
+  const meta = store.readMeta(flags.dataset);
+  if (!meta) throw new Error(`Unknown dataset: ${flags.dataset}`);
+
+  const bars = await new CsvLocalSource(storeDir).load({
+    datasetId: flags.dataset,
+  });
+  const config = buildConfig(flags, meta.symbol);
+  const backtest = runBacktest({
+    bars,
+    config,
+    strategy: createSmaCrossStrategy({
+      fastPeriod: Math.floor(fast),
+      slowPeriod: Math.floor(slow),
+    }),
+  });
+
+  if (backtest.trades.length === 0) {
+    throw new Error("Backtest produced zero trades — nothing to stress-test");
+  }
+
+  const method = (flags.method ?? "shuffle") as MonteCarloMethod;
+  if (method !== "shuffle" && method !== "bootstrap") {
+    throw new Error('--method must be "shuffle" or "bootstrap"');
+  }
+
+  const result = monteCarlo({
+    tradePnls: backtest.trades.map((t) => t.netProfit),
+    initialBalance: config.account.initialBalance,
+    simulations: Math.floor(num(flags.sims, 1_000)),
+    method,
+    seed: Math.floor(num(flags.seed, 42)),
+    ...(flags.dropRate !== undefined
+      ? { dropRate: num(flags.dropRate, 0) }
+      : {}),
+  });
+
+  console.log(`Monte Carlo (${result.method}) on ${meta.id}`);
+  console.log(`  params:       fast=${Math.floor(fast)} slow=${Math.floor(slow)}`);
+  console.log(`  trades:       ${result.tradeCount}`);
+  console.log(`  simulations:  ${result.simulations}`);
+  console.log(`  original net: ${result.original.netProfit}`);
+  console.log(`  original DD%: ${(result.original.maxDrawdownPct * 100).toFixed(2)}%`);
+  console.log(
+    `  net p5/p50/p95: ${result.netProfit.p5.toFixed(2)} / ${result.netProfit.p50.toFixed(2)} / ${result.netProfit.p95.toFixed(2)}`,
+  );
+  console.log(
+    `  DD%  p5/p50/p95: ${(result.maxDrawdownPct.p5 * 100).toFixed(2)}% / ${(result.maxDrawdownPct.p50 * 100).toFixed(2)}% / ${(result.maxDrawdownPct.p95 * 100).toFixed(2)}%`,
+  );
+  console.log(`  P(profit):    ${(result.probProfit * 100).toFixed(1)}%`);
+  console.log(`  P(ruin):      ${(result.probRuin * 100).toFixed(1)}%`);
+  console.log(
+    `  P(worse DD):  ${(result.probWorseDrawdownThanOriginal * 100).toFixed(1)}%`,
+  );
+
+  writeOut(flags.out, {
+    kind: "montecarlo",
+    dataset: meta,
+    params: { fast: Math.floor(fast), slow: Math.floor(slow) },
+    backtestMetrics: backtest.metrics,
     result,
   });
 }

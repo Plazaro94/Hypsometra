@@ -31,3 +31,13 @@ export {
   walkForward,
   type WalkForwardInput,
 } from "./walk-forward.js";
+
+export {
+  equityStatsFromPnls,
+  monteCarlo,
+  type EquityStats,
+  type MonteCarloInput,
+  type MonteCarloMethod,
+  type MonteCarloResult,
+  type PercentileSummary,
+} from "./monte-carlo.js";

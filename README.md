@@ -41,15 +41,15 @@ Hypsometra/
 
 ## Estado
 
-**Engine** + **Opt/WFO** + **Data (CSV)** + **CLI (dataset / optimize / wfo)** listos.
+**Engine** + **Opt/WFO** + **Data** + **CLI** + **Monte Carlo** listos.
 
 ```bash
 npm run hypsometra -- dataset add ./XAUUSD_H1.csv --symbol XAUUSD --timeframe H1
-npm run hypsometra -- dataset list
 npm run hypsometra -- wfo --dataset <id> --is 500 --oos 100 --fast 5:15:5 --slow 20:60:10 --out wfo.json
+npm run hypsometra -- montecarlo --dataset <id> --fast 10 --slow 40 --method bootstrap --sims 2000 --out mc.json
 ```
 
-Estrategia CLI v1: cruce SMA (placeholder). Orometra aparcado. Siguiente: dashboard o Monte Carlo.
+Estrategia CLI v1: cruce SMA. Orometra aparcado. Siguiente: dashboard web.
 
 ## Desarrollo local
 

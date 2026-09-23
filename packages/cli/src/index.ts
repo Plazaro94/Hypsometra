@@ -8,7 +8,7 @@ import {
   defaultStoreDir,
   ingestCsvFile,
 } from "@hypsometra/data";
-import { cmdOptimize, cmdWfo, type JobFlags } from "./jobs.js";
+import { cmdOptimize, cmdWfo, cmdMonteCarlo, type JobFlags } from "./jobs.js";
 
 function printHelp(): void {
   console.log(`Hypsometra CLI
@@ -19,12 +19,14 @@ Datasets:
   hypsometra dataset show <id> [--store <dir>]
 
 Jobs (SMA cross v1 strategy):
-  hypsometra optimize --dataset <id> --fast 3:5:1 --slow 8:12:2 [--search grid|genetic] [--criterion netProfit] [--out report.json]
-  hypsometra wfo --dataset <id> --is 40 --oos 20 --fast 3:5:1 --slow 10:14:2 [--wf rolling|anchored] [--step 20] [--out wfo.json]
+  hypsometra optimize --dataset <id> --fast 3:5:1 --slow 8:12:2 [--search grid|genetic] [--out report.json]
+  hypsometra wfo --dataset <id> --is 40 --oos 20 --fast 3:5:1 --slow 10:14:2 [--wf rolling|anchored] [--out wfo.json]
+  hypsometra montecarlo --dataset <id> --fast 10 --slow 30 [--method shuffle|bootstrap] [--sims 1000] [--out mc.json]
 
 Examples:
   hypsometra dataset add ./XAUUSD_H1.csv --symbol XAUUSD --timeframe H1
-  hypsometra wfo --dataset xauusd_h1_abc12345 --is 500 --oos 100 --fast 5:15:5 --slow 20:60:10 --search genetic --out wfo.json
+  hypsometra wfo --dataset xauusd_h1_abc12345 --is 500 --oos 100 --fast 5:15:5 --slow 20:60:10 --out wfo.json
+  hypsometra montecarlo --dataset xauusd_h1_abc12345 --fast 10 --slow 40 --method bootstrap --sims 2000 --out mc.json
 `);
 }
 
@@ -120,6 +122,9 @@ const jobOptions = {
   is: { type: "string" },
   oos: { type: "string" },
   step: { type: "string" },
+  sims: { type: "string" },
+  method: { type: "string" },
+  dropRate: { type: "string" },
 } as const;
 
 async function runDataset(sub: string | undefined, rest: string[]): Promise<number> {
@@ -178,7 +183,7 @@ export async function run(argv: string[]): Promise<number> {
     return runDataset(sub, tail);
   }
 
-  if (command === "optimize" || command === "wfo") {
+  if (command === "optimize" || command === "wfo" || command === "montecarlo") {
     const { values } = parseArgs({
       args: rest,
       options: jobOptions,
@@ -190,7 +195,8 @@ export async function run(argv: string[]): Promise<number> {
     }
     const flags = values as JobFlags;
     if (command === "optimize") await cmdOptimize(flags);
-    else await cmdWfo(flags);
+    else if (command === "wfo") await cmdWfo(flags);
+    else await cmdMonteCarlo(flags);
     return 0;
   }
 
