@@ -21,6 +21,12 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 
+# Proprietary EA sources and MT5 reports — never commit (the repo is public)
+private/
+*.mq5
+*.mqh
+*.ex5
+
 # Data & artifacts (local only)
 data/datasets/
 data/raw/

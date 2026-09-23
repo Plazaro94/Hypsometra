@@ -1,0 +1,14 @@
+{
+  "name": "@hypsometra/ui",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Shared design system for Hypsometra and Orometra (tokens, IBM Plex, base components).",
+  "exports": {
+    "./tokens.css": "./src/tokens.css",
+    "./base.css": "./src/base.css"
+  },
+  "files": [
+    "src",
+    "fonts"
+  ]
+}

@@ -9,6 +9,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./planning": {
+      "types": "./dist/planning.d.ts",
+      "import": "./dist/planning.js"
     }
   },
   "files": [
@@ -16,7 +20,7 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "npm run build && node --test ./dist/space.test.js ./dist/optimize.test.js ./dist/walk-forward.test.js ./dist/monte-carlo.test.js",
+    "test": "npm run build && node --test ./dist/space.test.js ./dist/optimize.test.js ./dist/walk-forward.test.js ./dist/monte-carlo.test.js ./dist/windows.test.js",
     "lint": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

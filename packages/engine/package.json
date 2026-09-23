@@ -9,6 +9,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./registry": {
+      "types": "./dist/strategy/registry.d.ts",
+      "import": "./dist/strategy/registry.js"
     }
   },
   "files": [

@@ -13,6 +13,7 @@
     "@hypsometra/data": "*",
     "@hypsometra/engine": "*",
     "@hypsometra/opt": "*",
+    "@hypsometra/ui": "*",
     "next": "15.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

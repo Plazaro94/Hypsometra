@@ -1,0 +1,53 @@
+/*
+ * Hypsometra design tokens — inherited verbatim from Orometra so both products
+ * read as one family. Never write literal colors outside this file.
+ *
+ * Color rule (from Orometra): green/red mean PROFIT/LOSS only. Verdicts and
+ * states use turquoise / amber / bronze / garnet, never the money colors.
+ */
+:root {
+  --bg:#070b14;          --surface:#0d1322;     --surface-2:#131c2f;   --surface-3:#1a2438;
+  --line-soft:#1b2740;   --line:#2a3853;        --line-strong:#3b4c6b;
+  --muted-3:#6f8098;     --muted-2:#738aa4;     --muted:#8fa3bd;
+  --text-2:#c0cede;      --text:#eaf1f9;        --text-hi:#ffffff;
+  --ok-bg:#052220;       --ok-line:#15514e;     --ok:#3ed7d0;     --ok-text:#8ae9e3;     --ok-hi:#c8fffb;
+  --warn-bg:#2a2113;     --warn-line:#5a4728;   --warn:#f2c26b;   --warn-text:#f7dba8;   --warn-hi:#ffeccb;
+  --danger-bg:#27101b;   --danger-line:#4d2237; --danger:#f07fa8; --danger-text:#f5a6c2; --danger-hi:#ffd0e1;
+  --info-bg:#101a2c;     --info-line:#2b405f;   --info:#6fa8ff;   --info-text:#9dc3ff;   --info-hi:#cfe2ff;
+  --profit:#4fd97e;      --loss:#ff7b6b;
+
+  /* Validation segments: in-sample reads as information, out-of-sample as the verdict. */
+  --seg-is:var(--info);   --seg-is-bg:var(--info-bg);   --seg-is-line:var(--info-line);
+  --seg-oos:var(--ok);    --seg-oos-bg:var(--ok-bg);    --seg-oos-line:var(--ok-line);
+
+  --accent:var(--ok);    --accent2:var(--info);
+  --radius:10px;
+  --font:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --font-display:"IBM Plex Sans",system-ui,sans-serif;
+  --fs-xs:11px; --fs-sm:12px; --fs-md:13px; --fs-base:14px; --fs-lg:15px; --fs-xl:18px; --fs-2xl:22px; --fs-display:clamp(34px,4vw,52px);
+  --space-section:56px;
+  color-scheme:dark;
+}
+
+[data-theme="light"] {
+  --bg:#f6f7f9;          --surface:#ffffff;     --surface-2:#eef1f5;   --surface-3:#e3e8ee;
+  --line-soft:#e8ecf1;   --line:#d5dbe3;        --line-strong:#b4bdc9;
+  --muted-3:#6e767f;     --muted-2:#646d78;     --muted:#58626e;
+  --text-2:#384049;      --text:#14181d;        --text-hi:#000000;
+  --ok-bg:#e4f4f5;       --ok-line:#a8d8db;     --ok:#0b6a73;     --ok-text:#0a5e66;     --ok-hi:#064047;
+  --warn-bg:#fbf1dd;     --warn-line:#e6cfa0;   --warn:#8a5b0a;   --warn-text:#7a5009;   --warn-hi:#5c3c06;
+  --danger-bg:#fbe9ef;   --danger-line:#efc2d2; --danger:#9b2f52; --danger-text:#8a2948; --danger-hi:#6b1f37;
+  --info-bg:#eaf0fc;     --info-line:#c0d2f2;   --info:#1f4fb0;   --info-text:#1c479e;   --info-hi:#133272;
+  --profit:#17794a;      --loss:#b3352a;
+  color-scheme:light;
+}
+
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:400;font-display:swap;src:url("../fonts/ibm-plex-sans-400.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-style:italic;font-weight:400;font-display:swap;src:url("../fonts/ibm-plex-sans-400-italic.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:500;font-display:swap;src:url("../fonts/ibm-plex-sans-500.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:600;font-display:swap;src:url("../fonts/ibm-plex-sans-600.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:700;font-display:swap;src:url("../fonts/ibm-plex-sans-700.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:400;font-display:swap;src:url("../fonts/ibm-plex-mono-400.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:600;font-display:swap;src:url("../fonts/ibm-plex-mono-600.woff2") format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:700;font-display:swap;src:url("../fonts/ibm-plex-mono-700.woff2") format("woff2")}
