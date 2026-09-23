@@ -123,11 +123,14 @@ function TesterImport({ study, replace }: ImportProps) {
         </button>
       </div>
       <Help>
+        <p>MT5 puede copiar toda la configuración del probador como texto, igual que copias un texto cualquiera:</p>
         <ol>
-          <li>En MT5 abre el probador: <strong>Ver → Probador de estrategias</strong> (Ctrl+R).</li>
-          <li>En la pestaña <strong>Configuración</strong>, haz clic en cualquier campo y pulsa <strong>Ctrl+C</strong>.</li>
-          <li>Pega el texto aquí y pulsa Aplicar.</li>
+          <li>Abre el probador: <strong>Ver → Probador de estrategias</strong> (Ctrl+R).</li>
+          <li>Ve a la pestaña <strong>Configuración</strong>: la de Experto, Símbolo, Intervalo, Depósito…</li>
+          <li>Haz clic en una zona vacía de esa pestaña (no dentro de una casilla) y pulsa <strong>Ctrl+C</strong>. No verás ningún aviso: el texto queda copiado.</li>
+          <li>Vuelve aquí, haz clic en el recuadro y pulsa <strong>Ctrl+V</strong>. Luego, Aplicar.</li>
         </ol>
+        <p>Es opcional: si prefieres, rellena esos datos abajo a mano.</p>
       </Help>
       <StatusLines status={status} />
     </ImportCard>
