@@ -14,9 +14,9 @@ de precio que el usuario controla (CSV / ticks exportados).
 
 ## Roadmap corto
 
-1. **Cimiento monorepo** ← (este commit)
-2. **Engine mínimo** — OHLC CSV → un pase → métricas
-3. **Opt + WFO** — genético/búsqueda + ventanas walk-forward
-4. **Port Orometra** → `packages/orometra`
-5. **Dashboard** — Next.js en Vercel + workers de cómputo
-6. **Monte Carlo** — cuando el engine emita lista de operaciones
+1. **Cimiento monorepo** ← hecho
+2. **Engine mínimo** — OHLC CSV → un pase → métricas ← hecho (v0)
+3. **Opt + WFO** — genético/búsqueda + ventanas walk-forward ← siguiente
+4. **Dashboard** — Next.js en Vercel + workers de cómputo
+5. **Monte Carlo** — cuando el engine emita lista de operaciones (ya emite `trades`)
+6. **Orometra** (`packages/orometra`) — **aplazado a propósito**. El paquete queda reservado; se integrará cuando el pipeline de backtest/opt ya produzca resultados auditables. No bloquea el desarrollo del motor.

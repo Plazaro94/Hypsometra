@@ -3,12 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "description": "Mide el relieve de tu estrategia, no la altura de un pico.",
-  "packageManager": "pnpm@9.15.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "workers/*"
+  ],
   "scripts": {
-    "dev:web": "pnpm --filter @hypsometra/web dev",
-    "build": "pnpm -r run build",
-    "test": "pnpm -r run test",
-    "lint": "pnpm -r run lint"
+    "dev:web": "npm run dev -w @hypsometra/web",
+    "build": "npm run build -w @hypsometra/engine && npm run build -ws --if-present",
+    "test": "npm run test -w @hypsometra/engine",
+    "test:engine": "npm run test -w @hypsometra/engine",
+    "lint": "npm run lint -ws --if-present"
   },
   "engines": {
     "node": ">=20"

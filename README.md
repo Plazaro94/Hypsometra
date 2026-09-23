@@ -25,9 +25,9 @@ Hypsometra/
 └── workers               Cómputo pesado (no serverless)
 ```
 
-### Orometra
+### Orometra (aplazado)
 
-[Orometra](https://github.com/Plazaro94/Orometra) es el módulo de **auditoría post-optimización**: umbrales absolutos, vecindad, mesetas, representante maximin y calificación de evidencia. En Hypsometra deja de ser una app aislada y pasa a ser `packages/orometra` — el instrumento que mide el relieve después (y también sobre resultados generados aquí).
+[Orometra](https://github.com/Plazaro94/Orometra) será el módulo de **auditoría post-optimización** (`packages/orometra`): mesetas, evidencia, maximin. **De momento no se desarrolla**; el stub del paquete solo reserva el sitio en el monorepo. Se añadirá cuando el engine y la optimización ya generen resultados dignos de auditar.
 
 ## Principios
 
@@ -39,7 +39,8 @@ Hypsometra/
 
 ## Estado
 
-Cimiento del monorepo. Siguiente foco: motor de backtest mínimo (`packages/engine`) y cableado de Orometra como paquete.
+**Engine v0 listo** (`packages/engine`): CSV → un pase → trades + métricas, con tests.
+Siguiente: optimización y walk-forward en `packages/opt`. Orometra sigue aparcado.
 
 ## Desarrollo local
 
