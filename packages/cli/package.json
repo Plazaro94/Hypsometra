@@ -1,0 +1,23 @@
+{
+  "name": "@hypsometra/cli",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "hypsometra": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "hypsometra": "npm run build && node ./dist/index.js",
+    "test": "npm run build && node --test ./dist/cli.test.js",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@hypsometra/data": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "typescript": "^5.8.2"
+  },
+  "description": "Hypsometra command-line interface."
+}

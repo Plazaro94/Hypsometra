@@ -21,7 +21,9 @@ Hypsometra/
 ├── apps/web              Dashboard (Vercel)
 ├── packages/engine       Backtest, ticks, costes, cuenta
 ├── packages/opt          Optimización, WFO, Monte Carlo
-├── packages/orometra     Auditoría de mesetas y evidencia
+├── packages/data         Fuentes de mercado (CSV → catalog/MT5)
+├── packages/cli          CLI (`hypsometra dataset …`)
+├── packages/orometra     Auditoría de mesetas (aplazado)
 └── workers               Cómputo pesado (no serverless)
 ```
 
@@ -39,11 +41,11 @@ Hypsometra/
 
 ## Estado
 
-**Engine v0** + **Opt/WFO v0** listos y testados.
-- `packages/engine` — CSV → un pase → métricas  
-- `packages/opt` — grid, genético, walk-forward `rolling` / `anchored`  
+**Engine** + **Opt/WFO** + **Data (CSV)** + **CLI** listos.
+- Ingestión: `npm run hypsometra -- dataset add ./archivo.csv --symbol XAUUSD --timeframe H1`
+- Datasets locales en `data/datasets/` (gitignored)
 
-Siguiente: CLI para lanzar jobs con tu CSV real, luego dashboard. Orometra sigue aparcado.
+Siguiente: cablear WFO desde CLI sobre un dataset. Orometra sigue aparcado.
 
 ## Desarrollo local
 

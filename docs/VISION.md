@@ -15,9 +15,11 @@ de precio que el usuario controla (CSV / ticks exportados).
 ## Roadmap corto
 
 1. **Cimiento monorepo** ← hecho
-2. **Engine mínimo** — OHLC CSV → un pase → métricas ← hecho (v0)
-3. **Opt + WFO** — grid / genético + walk-forward rolling/anchored ← hecho (v0)
-4. **CLI** — lanzar backtest / WFO con CSV exportado de MT5 ← siguiente
-5. **Dashboard** — Next.js en Vercel + workers de cómputo
-6. **Monte Carlo** — sobre la lista de `trades` del engine
-7. **Orometra** (`packages/orometra`) — **aplazado a propósito**
+2. **Engine mínimo** — OHLC CSV → un pase → métricas ← hecho
+3. **Opt + WFO** — grid / genético + walk-forward ← hecho
+4. **Data + CLI** — `MarketDataSource` + ingestión CSV + `hypsometra dataset` ← hecho
+5. **CLI WFO** — lanzar walk-forward sobre un dataset id ← siguiente
+6. **Dashboard** — Next.js en Vercel + workers
+7. **Monte Carlo** — sobre `trades` del engine
+8. **Orometra** — aplazado
+9. **Catalog / MT5 bridge** — mismos contratos, más adelante
